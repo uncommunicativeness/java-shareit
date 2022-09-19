@@ -43,4 +43,11 @@ public class ControllerExceptionHandler {
 
         return new ResponseEntity<>(Map.of("message", "Передан некорректный объект"), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<Map<String, String>> handleException(Throwable e) {
+        log.error(e.getMessage());
+
+        return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
