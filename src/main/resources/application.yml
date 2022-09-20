@@ -1,0 +1,25 @@
+logging:
+  level:
+    org:
+      springframework:
+        orm:
+          jpa:
+            JpaTransactionManager: DEBUG
+            nodeValue: INFO
+        transaction:
+          interceptor: TRACE
+          nodeValue: INFO
+spring:
+  jackson:
+    default-property-inclusion: non_null
+  jpa:
+    hibernate:
+      ddl-auto: create
+  datasource:
+    driverClassName: org.h2.Driver
+    password: test
+    username: test
+    url: jdbc:h2:mem:shareit
+  config:
+    activate:
+      on-profile: ci,test
