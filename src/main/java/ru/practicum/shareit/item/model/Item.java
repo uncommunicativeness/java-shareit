@@ -28,20 +28,26 @@ public class Item {
     @Column(name = "description", length = 10_000, nullable = false)
     String description;
 
-    @Column(name = "available", nullable = false)
+    @Column(name = "is_available", nullable = false)
     Boolean available;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     User owner;
 
     @ManyToOne
     @JoinColumn(name = "request_id")
     ItemRequest request;
 
-
-    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "item",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
     Set<Booking> bookings;
+
+    @OneToMany(mappedBy = "item",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    Set<Comment> comments;
 
     @Override
     public boolean equals(Object o) {

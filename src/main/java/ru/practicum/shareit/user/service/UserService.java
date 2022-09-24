@@ -36,15 +36,6 @@ public class UserService {
     }
 
     public UserDto save(UserDto userDto) {
-        // На данный момент при проверке уникальности email
-        // выполняем в сервисе, т.к. иначе будет сдвиг идентификатора
-        // и последующие тесты не пройдут
-        // TODO Удалить в следующей итерации
-        Optional<User> optional = userRepository.findByEmail(userDto.getEmail());
-        if (optional.isPresent()) {
-            throw new ConflictException(String.format("Пользователь с email=%s уже зарегистрирован", userDto.getEmail()));
-        }
-
         User user;
         try {
             user = userRepository.save(mapper.userDtoToUserMapper(userDto));

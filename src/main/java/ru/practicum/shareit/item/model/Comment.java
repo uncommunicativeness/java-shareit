@@ -1,8 +1,7 @@
-package ru.practicum.shareit.booking.model;
+package ru.practicum.shareit.item.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -12,56 +11,44 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "bookings")
+@Table(name = "comments")
 @Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Booking {
+public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator = "bookings_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comments_seq")
     Long id;
 
-    @Column(name = "start_date")
-    LocalDateTime start;
+    @Column(name = "text", length = 10_000, nullable = false)
+    String text;
 
-    @Column(name = "end_date")
-    LocalDateTime end;
-
-    @Enumerated(EnumType.STRING)
-    Status status;
-
+    @Column(name = "created")
+    LocalDateTime created;
     @ManyToOne
     @JoinColumn(name = "item_id")
     Item item;
 
     @ManyToOne
-    @JoinColumn(name = "booker_id")
-    User booker;
+    @JoinColumn(name = "author_id")
+    User author;
 
     @PrePersist
     void onCreate() {
-        status = Status.WAITING;
+        this.created = LocalDateTime.now();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Booking booking = (Booking) o;
-        return id != null && Objects.equals(id, booking.id);
+        Comment comment = (Comment) o;
+        return id != null && Objects.equals(id, comment.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
-
-
-    public enum Status {
-        WAITING,
-        APPROVED,
-        REJECTED,
-        CANCELED
-    }
 }
+
