@@ -3,7 +3,10 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingInDto;
+import ru.practicum.shareit.booking.dto.BookingOutDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.exceptions.BadRequestException;
@@ -12,7 +15,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.utils.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,20 +25,22 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookingService {
     final BookingRepository bookingRepository;
     final UserRepository userRepository;
     final ItemRepository itemRepository;
-    final ObjectMapper mapper;
+    final BookingMapper bookingMapper;
 
-    public BookingDto save(Long bookerId, BookingDto bookingDto) {
+    @Transactional
+    public BookingOutDto save(Long bookerId, BookingInDto bookingInDto) {
         if (bookerId == null) {
             throw new BadRequestException("В запросе не был передан заголовок X-Sharer-User-Id");
         }
 
-        Optional<Item> optionalItem = itemRepository.findById(bookingDto.getItemId());
+        Optional<Item> optionalItem = itemRepository.findById(bookingInDto.getItemId());
         if (optionalItem.isEmpty()) {
-            throw new NotFoundException(String.format("Вещь с id=%d не найдена", bookingDto.getItemId()));
+            throw new NotFoundException(String.format("Вещь с id=%d не найдена", bookingInDto.getItemId()));
         }
 
         Item item = optionalItem.get();
@@ -53,19 +57,20 @@ public class BookingService {
         User booker = optionalBooker.get();
 
         if (!item.getAvailable()) {
-            throw new BadRequestException(String.format("Вещь с id=%d недоступна для бронирования", bookingDto.getItemId()));
+            throw new BadRequestException(String.format("Вещь с id=%d недоступна для бронирования", bookingInDto.getItemId()));
         }
 
-        Booking booking = mapper.bookingDtoToBookingMapper(bookingDto);
+        Booking booking = bookingMapper.toBooking(bookingInDto);
         booking.setBooker(booker);
         booking.setItem(item);
 
         booking = bookingRepository.save(booking);
 
-        return mapper.bookingToBookingDtoMapper(booking);
+        return bookingMapper.toDto(booking);
     }
 
-    public BookingDto setStatus(Long bookingId, Long ownerId, Boolean approved) {
+    @Transactional
+    public BookingOutDto setStatus(Long bookingId, Long ownerId, Boolean approved) {
         if (ownerId == null) {
             throw new BadRequestException("В запросе не был передан заголовок X-Sharer-User-Id");
         }
@@ -96,10 +101,10 @@ public class BookingService {
         booking.setStatus(approved ? Booking.Status.APPROVED : Booking.Status.REJECTED);
         booking = bookingRepository.save(booking);
 
-        return mapper.bookingToBookingDtoMapper(booking);
+        return bookingMapper.toDto(booking);
     }
 
-    public BookingDto findById(Long userId, Long bookingId) {
+    public BookingOutDto findById(Long userId, Long bookingId) {
         if (userId == null) {
             throw new BadRequestException("В запросе не был передан заголовок X-Sharer-User-Id");
         }
@@ -115,10 +120,10 @@ public class BookingService {
                     userId, bookingId));
         }
 
-        return mapper.bookingToBookingDtoMapper(booking);
+        return bookingMapper.toDto(booking);
     }
 
-    public List<BookingDto> findAllByBookerAndState(Long bookerId, String stateString) {
+    public List<BookingOutDto> findAllByBookerAndState(Long bookerId, String stateString) {
         if (bookerId == null) {
             throw new BadRequestException("В запросе не был передан заголовок X-Sharer-User-Id");
         }
@@ -158,10 +163,12 @@ public class BookingService {
                 break;
         }
 
-        return bookings.stream().map(mapper::bookingToBookingDtoMapper).collect(Collectors.toList());
+        return bookings.stream()
+                .map(bookingMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    public List<BookingDto> findAllByOwnerAndState(Long ownerId, String stateString) {
+    public List<BookingOutDto> findAllByOwnerAndState(Long ownerId, String stateString) {
         if (ownerId == null) {
             throw new BadRequestException("В запросе не был передан заголовок X-Sharer-User-Id");
         }
@@ -203,6 +210,8 @@ public class BookingService {
                 throw new BadRequestException("В запросе был передан некорректный статус");
         }
 
-        return bookings.stream().map(mapper::bookingToBookingDtoMapper).collect(Collectors.toList());
+        return bookings.stream()
+                .map(bookingMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

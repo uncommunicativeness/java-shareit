@@ -7,6 +7,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -42,12 +43,12 @@ public class Item {
     @OneToMany(mappedBy = "item",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
-    Set<Booking> bookings;
+    Set<Booking> bookings = new HashSet<>();
 
     @OneToMany(mappedBy = "item",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
-    Set<Comment> comments;
+    Set<Comment> comments = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
