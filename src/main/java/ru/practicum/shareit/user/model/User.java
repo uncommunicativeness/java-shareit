@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicUpdate;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 
@@ -48,6 +49,11 @@ public class User {
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
     Set<Booking> bookings;
+
+    @OneToMany(mappedBy = "author",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    Set<Comment> comments;
 
     @Override
     public boolean equals(Object o) {

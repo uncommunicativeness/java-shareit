@@ -2,12 +2,14 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.exceptions.ConflictException;
 import ru.practicum.shareit.exception.exceptions.NotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserInDto;
+import ru.practicum.shareit.user.dto.UserOutDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.utils.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,55 +17,49 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
     final UserRepository userRepository;
-    final ObjectMapper mapper;
+    final UserMapper userMapper;
 
-    public List<UserDto> findAll() {
+    public List<UserOutDto> findAll() {
         return userRepository.findAll()
                 .stream()
-                .map(mapper::userToUserDtoMapper)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public UserDto findById(Long id) {
+    public UserOutDto findById(Long id) {
         Optional<User> optional = userRepository.findById(id);
         if (optional.isPresent()) {
-            return mapper.userToUserDtoMapper(optional.get());
+            return userMapper.toDto(optional.get());
         }
 
         throw new NotFoundException(String.format("Пользователь с id=%d не найден", id));
     }
 
-    public UserDto save(UserDto userDto) {
-        // На данный момент при проверке уникальности email
-        // выполняем в сервисе, т.к. иначе будет сдвиг идентификатора
-        // и последующие тесты не пройдут
-        // TODO Удалить в следующей итерации
-        Optional<User> optional = userRepository.findByEmail(userDto.getEmail());
-        if (optional.isPresent()) {
-            throw new ConflictException(String.format("Пользователь с email=%s уже зарегистрирован", userDto.getEmail()));
-        }
-
+    @Transactional
+    public UserOutDto save(UserInDto userInDto) {
         User user;
         try {
-            user = userRepository.save(mapper.userDtoToUserMapper(userDto));
+            user = userRepository.save(userMapper.toUser(userInDto));
         } catch (Exception e) {
             throw new ConflictException("Ошибка сохранения пользователя");
         }
-        return mapper.userToUserDtoMapper(user);
+        return userMapper.toDto(user);
     }
 
-    public UserDto update(Long id, UserDto userDto) {
+    @Transactional
+    public UserOutDto update(Long id, UserInDto userInDto) {
         Optional<User> optional = userRepository.findById(id);
         if (optional.isPresent()) {
             User user = optional.get();
 
-            if (userDto.getName() != null) {
-                user.setName(userDto.getName());
+            if (userInDto.getName() != null) {
+                user.setName(userInDto.getName());
             }
-            if (userDto.getEmail() != null) {
-                user.setEmail(userDto.getEmail());
+            if (userInDto.getEmail() != null) {
+                user.setEmail(userInDto.getEmail());
             }
 
             try {
@@ -71,12 +67,13 @@ public class UserService {
             } catch (Exception e) {
                 throw new ConflictException("Ошибка сохранения пользователя");
             }
-            return mapper.userToUserDtoMapper(userRepository.save(user));
+            return userMapper.toDto(user);
         }
 
         throw new NotFoundException(String.format("Пользователь с id=%d не найден", id));
     }
 
+    @Transactional
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }

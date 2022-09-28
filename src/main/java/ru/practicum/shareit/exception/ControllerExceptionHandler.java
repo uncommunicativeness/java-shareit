@@ -20,34 +20,34 @@ public class ControllerExceptionHandler {
     public ResponseEntity<Map<String, String>> handleException(NotFoundException e) {
         log.warn(e.getMessage());
 
-        return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, String>> handleException(ConflictException e) {
         log.warn(e.getMessage());
 
-        return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.CONFLICT);
+        return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, String>> handleException(BadRequestException e) {
         log.warn(e.getMessage());
 
-        return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleException(MethodArgumentNotValidException e) {
         log.warn(e.getMessage());
 
-        return new ResponseEntity<>(Map.of("message", "Передан некорректный объект"), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(Map.of("error", "Передан некорректный объект"), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<Map<String, String>> handleException(Throwable e) {
         log.error(e.getMessage());
 
-        return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

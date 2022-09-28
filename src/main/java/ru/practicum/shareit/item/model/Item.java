@@ -7,6 +7,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -28,20 +29,26 @@ public class Item {
     @Column(name = "description", length = 10_000, nullable = false)
     String description;
 
-    @Column(name = "available", nullable = false)
+    @Column(name = "is_available", nullable = false)
     Boolean available;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     User owner;
 
     @ManyToOne
     @JoinColumn(name = "request_id")
     ItemRequest request;
 
+    @OneToMany(mappedBy = "item",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    Set<Booking> bookings = new HashSet<>();
 
-    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    Set<Booking> bookings;
+    @OneToMany(mappedBy = "item",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    Set<Comment> comments = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
