@@ -15,4 +15,6 @@ public class ItemInDto {
 
     @NotNull
     Boolean available;
+
+    Long requestId;
 }

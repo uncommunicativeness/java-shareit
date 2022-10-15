@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingInDto;
@@ -123,7 +125,7 @@ public class BookingService {
         return bookingMapper.toDto(booking);
     }
 
-    public List<BookingOutDto> findAllByBookerAndState(Long bookerId, String stateString) {
+    public List<BookingOutDto> findAllByBookerAndState(Long bookerId, String stateString, Integer from, Integer size) {
         if (bookerId == null) {
             throw new BadRequestException("В запросе не был передан заголовок X-Sharer-User-Id");
         }
@@ -141,25 +143,25 @@ public class BookingService {
         }
 
         List<Booking> bookings = new ArrayList<>();
-
+        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("start").descending());
         switch (state) {
             case ALL:
-                bookings = bookingRepository.findByBooker_IdOrderByEndDesc(bookerId);
+                bookings = bookingRepository.findByBooker_Id(bookerId, pageRequest);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByBookerCurrentBookings(bookerId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerCurrentBookings(bookerId, LocalDateTime.now(), pageRequest);
                 break;
             case PAST:
-                bookings = bookingRepository.findByBookerPastBookings(bookerId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerPastBookings(bookerId, LocalDateTime.now(), pageRequest);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBookerFutureBookings(bookerId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerFutureBookings(bookerId, LocalDateTime.now(), pageRequest);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByBooker_IdAndStatusOrderByEndDesc(bookerId, Booking.Status.WAITING);
+                bookings = bookingRepository.findByBooker_IdAndStatus(bookerId, Booking.Status.WAITING, pageRequest);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByBooker_IdAndStatusOrderByEndDesc(bookerId, Booking.Status.REJECTED);
+                bookings = bookingRepository.findByBooker_IdAndStatus(bookerId, Booking.Status.REJECTED, pageRequest);
                 break;
         }
 
@@ -168,7 +170,7 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
-    public List<BookingOutDto> findAllByOwnerAndState(Long ownerId, String stateString) {
+    public List<BookingOutDto> findAllByOwnerAndState(Long ownerId, String stateString, Integer from, Integer size) {
         if (ownerId == null) {
             throw new BadRequestException("В запросе не был передан заголовок X-Sharer-User-Id");
         }
@@ -186,25 +188,25 @@ public class BookingService {
         }
 
         List<Booking> bookings;
-
+        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("start").descending());
         switch (state) {
             case ALL:
-                bookings = bookingRepository.findByItem_Owner_IdOrderByEndDesc(ownerId);
+                bookings = bookingRepository.findByItem_Owner_Id(ownerId, pageRequest);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByOwnerIdCurrentBookings(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findByOwnerIdCurrentBookings(ownerId, LocalDateTime.now(), pageRequest);
                 break;
             case PAST:
-                bookings = bookingRepository.findByOwnerIdPastBookings(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findByOwnerIdPastBookings(ownerId, LocalDateTime.now(), pageRequest);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByOwnerIdFutureBookings(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findByOwnerIdFutureBookings(ownerId, LocalDateTime.now(), pageRequest);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByEndDesc(ownerId, Booking.Status.WAITING);
+                bookings = bookingRepository.findByItem_Owner_IdAndStatus(ownerId, Booking.Status.WAITING, pageRequest);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByEndDesc(ownerId, Booking.Status.REJECTED);
+                bookings = bookingRepository.findByItem_Owner_IdAndStatus(ownerId, Booking.Status.REJECTED, pageRequest);
                 break;
             default:
                 throw new BadRequestException("В запросе был передан некорректный статус");
