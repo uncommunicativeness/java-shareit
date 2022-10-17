@@ -13,6 +13,7 @@ import ru.practicum.shareit.exception.exceptions.NotFoundException;
 import java.util.Map;
 
 @Slf4j
+@Generated
 @ControllerAdvice
 public class ControllerExceptionHandler {
 

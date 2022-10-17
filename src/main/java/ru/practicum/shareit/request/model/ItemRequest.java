@@ -53,6 +53,6 @@ public class ItemRequest {
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return id != null ? id.hashCode() : 0;
     }
 }
