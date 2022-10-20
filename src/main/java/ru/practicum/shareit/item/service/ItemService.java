@@ -21,6 +21,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -39,6 +41,7 @@ public class ItemService {
     final UserRepository userRepository;
     final BookingRepository bookingRepository;
     final CommentRepository commentRepository;
+    final ItemRequestRepository itemRequestRepository;
     final ItemMapper itemMapper;
     final CommentMapper commentMapper;
 
@@ -53,18 +56,22 @@ public class ItemService {
         throw new NotFoundException(String.format("Пользователь с id=%d не найден", itemId));
     }
 
-    public List<ItemWithBookingDateOutDto> findAllByOwnerId(Long ownerId) {
-        return itemRepository.findAllByOwnerId(ownerId)
+    public List<ItemWithBookingDateOutDto> findAllByOwnerId(Long ownerId, Integer from, Integer size) {
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        return itemRepository.findAllByOwnerId(ownerId, pageable)
                 .stream()
                 .map(item -> getItemWithBookingDateDto(ownerId, item))
                 .collect(Collectors.toList());
     }
 
-    public List<ItemOutDto> search(String text) {
+    public List<ItemOutDto> search(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.search(text)
+
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        return itemRepository.search(text, pageRequest)
                 .stream()
                 .map(itemMapper::toIemOutDto)
                 .collect(Collectors.toList());
@@ -81,6 +88,14 @@ public class ItemService {
             User owner = optional.get();
             Item item = itemMapper.toItem(itemInDto);
             item.setOwner(owner);
+            if (itemInDto.getRequestId() != null) {
+                Optional<ItemRequest> optionalItemRequest = itemRequestRepository.findById(itemInDto.getRequestId());
+                if (optionalItemRequest.isPresent()) {
+                    item.setRequest(optionalItemRequest.get());
+                } else {
+                    throw new NotFoundException(String.format("Запрос с id=%d не найден", itemInDto.getRequestId()));
+                }
+            }
             item = itemRepository.save(item);
             return itemMapper.toIemOutDto(item);
         }

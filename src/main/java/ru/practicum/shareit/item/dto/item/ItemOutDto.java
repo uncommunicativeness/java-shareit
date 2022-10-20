@@ -14,6 +14,7 @@ public class ItemOutDto {
     String description;
     Boolean available;
     Set<Comment> comments;
+    Long requestId;
 
     @Data
     @Builder

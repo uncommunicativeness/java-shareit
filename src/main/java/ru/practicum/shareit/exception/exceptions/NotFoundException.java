@@ -1,5 +1,8 @@
 package ru.practicum.shareit.exception.exceptions;
 
+import ru.practicum.shareit.exception.Generated;
+
+@Generated
 public class NotFoundException extends RuntimeException {
     public NotFoundException() {
     }

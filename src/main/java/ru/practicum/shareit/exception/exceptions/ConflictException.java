@@ -1,6 +1,10 @@
 package ru.practicum.shareit.exception.exceptions;
 
+import lombok.Generated;
+
+@Generated
 public class ConflictException extends RuntimeException {
+
     public ConflictException() {
     }
 
