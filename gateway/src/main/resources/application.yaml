@@ -1,0 +1,6 @@
+feign:
+  httpclient:
+    enabled: true
+
+shareit-server:
+  url: ${SHAREIT_SERVER_URL:http://localhost:8081}
