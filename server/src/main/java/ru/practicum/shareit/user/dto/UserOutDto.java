@@ -1,10 +1,12 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
+@EqualsAndHashCode(of = "id")
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserOutDto {
     Long id;
     String name;

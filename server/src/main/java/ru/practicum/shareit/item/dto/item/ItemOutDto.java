@@ -1,13 +1,16 @@
 package ru.practicum.shareit.item.dto.item;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Builder
+@EqualsAndHashCode(of = "id")
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemOutDto {
     Long id;
     String name;

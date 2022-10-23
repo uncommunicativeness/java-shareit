@@ -1,11 +1,14 @@
 package ru.practicum.shareit.item.dto.item;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 
-@Data
+@Getter
+@Setter
 @Builder
+@EqualsAndHashCode
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemInDto {
     String name;
 
