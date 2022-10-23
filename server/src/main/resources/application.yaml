@@ -1,0 +1,38 @@
+server:
+  port: 8081
+spring:
+  sql:
+    init:
+      mode: never
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/shareit}
+    username: ${SPRING_DATASOURCE_USERNAME:user}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      show_sql: 'true'
+      ddl-auto: update
+logging:
+  level:
+    org:
+      springframework:
+        transaction:
+          nodeValue: INFO
+          interceptor: TRACE
+        orm:
+          jpa:
+            JpaTransactionManager: DEBUG
+            nodeValue: INFO
+
+---
+spring:
+  datasource:
+    url: jdbc:h2:mem:shareit
+    username: test
+    password: test
+    driverClassName: org.h2.Driver
+  config:
+    activate:
+      on-profile: ci,test
